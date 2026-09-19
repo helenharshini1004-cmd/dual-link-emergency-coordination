@@ -2163,3 +2163,698 @@ footer {
     width: auto;
   }
 }
+/* =========================================================
+   DUAL LINK — LOGIN + ROLE WORKSPACES + VOICE
+   ========================================================= */
+
+.login-screen {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(7, 31, 48, 0.96),
+      rgba(10, 65, 77, 0.92)
+    ),
+    url("https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=2000&q=85")
+      center / cover;
+}
+
+.login-background {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(74, 222, 214, 0.15),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(255, 255, 255, 0.08),
+      transparent 30%
+    );
+}
+
+.login-container {
+  position: relative;
+  z-index: 2;
+  width: min(480px, 92%);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 28px;
+  color: white;
+}
+
+.login-brand h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.login-brand p {
+  margin: 3px 0 0;
+  opacity: 0.75;
+  font-size: 13px;
+}
+
+.login-logo {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  color: #0b6570;
+  font-size: 34px;
+  font-weight: 800;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 24px;
+  padding: 34px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+.login-heading span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  color: #16828a;
+}
+
+.login-heading h2 {
+  margin: 8px 0;
+  font-size: 25px;
+  color: #17323d;
+}
+
+.login-heading p {
+  margin: 0 0 25px;
+  color: #6c7d84;
+  font-size: 14px;
+}
+
+.role-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.role-selector button {
+  border: 1px solid #dbe7e9;
+  background: #f7fbfb;
+  border-radius: 14px;
+  padding: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  transition: 0.2s ease;
+}
+
+.role-selector button:hover {
+  border-color: #56aeb2;
+}
+
+.role-selector button.active {
+  background: #e8f7f6;
+  border-color: #16828a;
+  box-shadow: inset 0 0 0 1px #16828a;
+}
+
+.role-icon {
+  font-size: 25px;
+}
+
+.role-selector strong {
+  display: block;
+  color: #183943;
+  font-size: 13px;
+}
+
+.role-selector small {
+  display: block;
+  color: #71838a;
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+.login-card form label {
+  display: block;
+  margin: 14px 0 7px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #536c73;
+}
+
+.login-card form input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d6e3e5;
+  border-radius: 11px;
+  padding: 13px 14px;
+  font-size: 14px;
+  outline: none;
+  background: #fbfdfd;
+  color: #183943;
+}
+
+.login-card form input:focus {
+  border-color: #16828a;
+  box-shadow: 0 0 0 3px rgba(22, 130, 138, 0.1);
+}
+
+.login-button {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: #116f78;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.2s ease;
+}
+
+.login-button:hover {
+  transform: translateY(-1px);
+  background: #0c5d65;
+}
+
+.login-error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #fff0f0;
+  color: #b52f2f;
+  font-size: 12px;
+}
+
+.demo-credentials {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 11px;
+  background: #f1f7f7;
+  text-align: center;
+}
+
+.demo-credentials strong,
+.demo-credentials span {
+  display: block;
+}
+
+.demo-credentials strong {
+  font-size: 10px;
+  color: #557077;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.demo-credentials span {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #116f78;
+  font-weight: 700;
+}
+
+.login-footer {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 10px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.workspace-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(22, 130, 138, 0.12);
+  color: #23454d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.workspace-badge small {
+  opacity: 0.65;
+  font-weight: 500;
+}
+
+.logout-button {
+  border: 1px solid #d7e4e5;
+  background: white;
+  color: #35545b;
+  border-radius: 9px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.logout-button:hover {
+  background: #f2f8f8;
+}
+
+.role-banner {
+  margin: 22px 0;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: linear-gradient(
+    100deg,
+    #e9f8f7,
+    #f7fbfb
+  );
+  border: 1px solid #d6ebeb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.role-banner > div:first-child > span,
+.role-status span {
+  display: block;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #668087;
+}
+
+.role-banner strong {
+  display: block;
+  margin-top: 5px;
+  color: #173a43;
+}
+
+.role-banner small {
+  display: block;
+  margin-top: 5px;
+  color: #60767c;
+}
+
+.role-status {
+  text-align: right;
+  min-width: 120px;
+}
+
+.role-status strong {
+  color: #16828a;
+}
+
+.voice-supported {
+  background: #e9f7f6;
+  color: #167a81;
+  padding: 8px 11px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.microphone {
+  transition: 0.2s ease;
+}
+
+.microphone.recording {
+  animation: voicePulse 1.2s infinite;
+  transform: scale(1.08);
+}
+
+@keyframes voicePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 130, 138, 0.35);
+  }
+
+  70% {
+    box-shadow: 0 0 0 18px rgba(22, 130, 138, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 130, 138, 0);
+  }
+}
+
+.voice-message {
+  display: block;
+  margin-top: 10px;
+  color: #16828a;
+  font-size: 11px;
+}
+
+.clear-voice {
+  border: 1px solid #d6e5e6;
+  background: white;
+  color: #557077;
+  border-radius: 7px;
+  padding: 6px 9px;
+  font-size: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.hospital-row {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.hospital-row:hover {
+  border-color: #b8dfe0;
+  background: #f8fcfc;
+}
+
+.simulation-control {
+  margin-top: 18px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f5fafa;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.simulation-control button {
+  border: 1px solid #b7d8da;
+  background: white;
+  color: #126e76;
+  border-radius: 9px;
+  padding: 9px 13px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.simulation-control button.simulation-active {
+  background: #e4f6f4;
+  border-color: #16828a;
+}
+
+.simulation-control span {
+  color: #6b7e83;
+  font-size: 11px;
+}
+
+.route-line.moving {
+  animation: routeMove 2s linear infinite;
+}
+
+@keyframes routeMove {
+  from {
+    transform: translateX(-8px);
+  }
+
+  to {
+    transform: translateX(18px);
+  }
+}
+
+.primary-button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.notification-toast {
+  position: fixed;
+  right: 25px;
+  bottom: 25px;
+  z-index: 1000;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #126f77;
+  color: white;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  font-size: 13px;
+  font-weight: 700;
+  animation: toastIn 0.3s ease;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .header-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .workspace-badge {
+    display: none;
+  }
+
+  .role-banner {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .login-card {
+    padding: 23px;
+  }
+
+  .login-brand h1 {
+    font-size: 27px;
+  }
+
+  .role-selector {
+    grid-template-columns: 1fr;
+  }
+
+  .login-footer {
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .role-banner {
+    flex-direction: column;
+  }
+
+  .role-status {
+    text-align: left;
+  }
+
+  .simulation-control {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .notification-toast {
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+  }
+}
+/* =========================================================
+   DUAL LINK — VOICE TO TEXT + HOSPITAL SPECIALTIES
+   ========================================================= */
+
+/* Voice-to-text live status */
+.voice-message {
+  display: block;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #eef9f5;
+  color: #167a5a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Recording state */
+.voice-button.recording {
+  background: #fff0f2;
+  border-color: #d95463;
+  color: #b83f4e;
+}
+
+.voice-button.recording:hover {
+  background: #ffe5e8;
+  border-color: #c94756;
+}
+
+/* Voice transcript area */
+.voice-transcript {
+  width: 100%;
+  min-height: 105px;
+  margin-top: 10px;
+  padding: 12px;
+  box-sizing: border-box;
+  resize: vertical;
+
+  border: 1px solid #d7e5df;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #29483e;
+
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.55;
+
+  outline: none;
+}
+
+.voice-transcript:focus {
+  border-color: #6fba9c;
+  box-shadow: 0 0 0 3px rgba(42, 155, 112, 0.08);
+}
+
+.voice-transcript::placeholder {
+  color: #9aa9a4;
+}
+
+/* Voice listening indicator */
+.voice-listening {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-top: 8px;
+  padding: 6px 9px;
+
+  border-radius: 20px;
+
+  background: #fff0f2;
+  color: #b94359;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.voice-listening::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d95463;
+  animation: voiceDot 1s infinite;
+}
+
+@keyframes voiceDot {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+}
+
+/* =========================================================
+   HOSPITAL SPECIALTIES
+   ========================================================= */
+
+.specialty-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.specialty-tag {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 4px 7px;
+
+  border-radius: 12px;
+
+  background: #edf7f3;
+  border: 1px solid #d7ebe3;
+
+  color: #397361;
+
+  font-size: 8px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.specialty-tag.primary {
+  background: #e2f4ed;
+  border-color: #b9dfce;
+  color: #197653;
+}
+
+/* Hospital specialty section inside recommendation */
+.recommendation-specialties {
+  margin-top: 12px;
+}
+
+.recommendation-specialties > span {
+  display: block;
+  margin-bottom: 7px;
+
+  color: #a6d8c5;
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Better hospital name area when specialties are shown */
+.hospital-name-content {
+  min-width: 0;
+  flex: 1;
+}
+
+/* Mobile adjustment */
+@media (max-width: 720px) {
+  .specialty-tags {
+    max-width: 100%;
+  }
+
+  .specialty-tag {
+    font-size: 8px;
+    padding: 4px 6px;
+  }
+
+  .voice-transcript {
+    min-height: 120px;
+  }
+}

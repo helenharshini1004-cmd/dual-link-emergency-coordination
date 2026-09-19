@@ -1,5 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
+
+/* =========================================================
+   HOSPITAL DATA
+   ========================================================= */
 
 const hospitals = [
   {
@@ -12,8 +16,14 @@ const hospitals = [
     ot: "Ready",
     trauma: "Ready",
     eta: 9,
-    score: 94,
     status: "READY",
+    score: 94,
+    specialties: [
+      "Trauma Care",
+      "Emergency Medicine",
+      "Critical Care",
+      "Emergency Surgery",
+    ],
   },
   {
     name: "CityCare Multispeciality",
@@ -25,8 +35,14 @@ const hospitals = [
     ot: "Ready",
     trauma: "Ready",
     eta: 10,
-    score: 78,
     status: "LIMITED",
+    score: 78,
+    specialties: [
+      "Emergency Medicine",
+      "General Surgery",
+      "Critical Care",
+      "Orthopaedics",
+    ],
   },
   {
     name: "Metro General Hospital",
@@ -38,48 +54,244 @@ const hospitals = [
     ot: "Occupied",
     trauma: "Limited",
     eta: 7,
-    score: 42,
     status: "OVERLOADED",
+    score: 42,
+    specialties: [
+      "General Emergency",
+      "Basic Trauma Care",
+      "General Medicine",
+    ],
   },
 ];
 
-const preparationItems = [
-  "Emergency Bed",
-  "ICU",
-  "Emergency Doctor",
-  "O+ Blood",
-  "Trauma Team",
-  "Emergency OT",
-];
+/* =========================================================
+   LOGIN CREDENTIALS
+   ========================================================= */
+
+const credentials = {
+  ambulance: {
+    id: "AMB-042",
+    password: "ambulance123",
+  },
+  hospital: {
+    id: "HOSP-01",
+    password: "hospital123",
+  },
+};
+
+/* =========================================================
+   LOGIN SCREEN
+   ========================================================= */
+
+function LoginScreen({ onLogin }) {
+  const [role, setRole] = useState("ambulance");
+
+  const [userId, setUserId] = useState(
+    credentials.ambulance.id
+  );
+
+  const [password, setPassword] = useState(
+    credentials.ambulance.password
+  );
+
+  const [error, setError] = useState("");
+
+  const changeRole = (newRole) => {
+    setRole(newRole);
+    setUserId(credentials[newRole].id);
+    setPassword(credentials[newRole].password);
+    setError("");
+  };
+
+  const handleLogin = (event) => {
+    event.preventDefault();
+
+    if (
+      userId === credentials[role].id &&
+      password === credentials[role].password
+    ) {
+      onLogin(role, userId);
+    } else {
+      setError("Invalid demo credentials.");
+    }
+  };
+
+  return (
+    <div className="login-screen">
+      <div className="login-background"></div>
+
+      <div className="login-container">
+        <div className="login-brand">
+          <div className="login-logo">+</div>
+
+          <div>
+            <h1>Dual Link</h1>
+            <p>Emergency Healthcare Coordination Platform</p>
+          </div>
+        </div>
+
+        <div className="login-card">
+          <div className="login-heading">
+            <span>SECURE ACCESS</span>
+
+            <h2>Emergency Command Portal</h2>
+
+            <p>
+              Select your operational workspace to continue.
+            </p>
+          </div>
+
+          <div className="role-selector">
+            <button
+              className={role === "ambulance" ? "active" : ""}
+              onClick={() => changeRole("ambulance")}
+              type="button"
+            >
+              <span className="role-icon">🚑</span>
+
+              <span>
+                <strong>Ambulance</strong>
+                <small>Field Medical Team</small>
+              </span>
+            </button>
+
+            <button
+              className={role === "hospital" ? "active" : ""}
+              onClick={() => changeRole("hospital")}
+              type="button"
+            >
+              <span className="role-icon">🏥</span>
+
+              <span>
+                <strong>Hospital</strong>
+                <small>Receiving Hospital</small>
+              </span>
+            </button>
+          </div>
+
+          <form onSubmit={handleLogin}>
+            <label>
+              {role === "ambulance"
+                ? "AMBULANCE ID"
+                : "HOSPITAL ID"}
+            </label>
+
+            <input
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder={
+                role === "ambulance"
+                  ? "Enter ambulance ID"
+                  : "Enter hospital ID"
+              }
+            />
+
+            <label>PASSWORD</label>
+
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+            />
+
+            {error && (
+              <div className="login-error">
+                {error}
+              </div>
+            )}
+
+            <button className="login-button" type="submit">
+              Enter{" "}
+              {role === "ambulance"
+                ? "Ambulance Workspace"
+                : "Hospital Workspace"}
+              <span>→</span>
+            </button>
+          </form>
+
+          <div className="demo-credentials">
+            <strong>Hackathon Demo Credentials</strong>
+
+            <span>
+              {role === "ambulance"
+                ? "AMB-042 / ambulance123"
+                : "HOSP-01 / hospital123"}
+            </span>
+          </div>
+        </div>
+
+        <div className="login-footer">
+          <span>● System Online</span>
+          <span>Dual Link Prototype</span>
+          <span>Synthetic Demonstration Data</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   MAIN APP
+   ========================================================= */
 
 function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [role, setRole] = useState(null);
+  const [userId, setUserId] = useState("");
+
   const [confirmed, setConfirmed] = useState(false);
+
   const [recording, setRecording] = useState(false);
-  const [notification, setNotification] = useState(false);
-  const [simulation, setSimulation] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [voiceError, setVoiceError] = useState("");
+
   const [selectedHospitalCode, setSelectedHospitalCode] =
     useState("HOSP-01");
-  const [search, setSearch] = useState("");
+
+  const [simulation, setSimulation] = useState(false);
+  const [notification, setNotification] = useState("");
+
+  const recognitionRef = useRef(null);
 
   const selectedHospital =
     hospitals.find(
-      (hospital) => hospital.code === selectedHospitalCode
+      (hospital) =>
+        hospital.code === selectedHospitalCode
     ) || hospitals[0];
 
-  const filteredHospitals = useMemo(() => {
-    const value = search.trim().toLowerCase();
+  const ambulanceEta = simulation
+    ? Math.max(selectedHospital.eta - 2, 5)
+    : selectedHospital.eta;
 
-    if (!value) {
-      return hospitals;
-    }
+  const distance = simulation
+    ? "3.9 km"
+    : "5.8 km";
 
-    return hospitals.filter(
-      (hospital) =>
-        hospital.name.toLowerCase().includes(value) ||
-        hospital.code.toLowerCase().includes(value) ||
-        hospital.status.toLowerCase().includes(value)
-    );
-  }, [search]);
+  /* =======================================================
+     LOGIN
+     ======================================================= */
+
+  const handleLogin = (selectedRole, id) => {
+    setRole(selectedRole);
+    setUserId(id);
+    setLoggedIn(true);
+  };
+
+  const logout = () => {
+    stopVoiceRecognition();
+
+    setLoggedIn(false);
+    setRole(null);
+    setUserId("");
+    setConfirmed(false);
+    setTranscript("");
+    setVoiceError("");
+  };
+
+  /* =======================================================
+     NAVIGATION
+     ======================================================= */
 
   const scrollToSection = (className) => {
     document
@@ -94,78 +306,257 @@ function App() {
     scrollToSection("hospital-panel");
   };
 
-  const selectHospital = (hospital) => {
-    if (confirmed) {
-      return;
-    }
+  /* =======================================================
+     HOSPITAL SELECTION
+     ======================================================= */
 
-    setSelectedHospitalCode(hospital.code);
-
-    setTimeout(() => {
-      scrollToSection("recommendation-panel");
-    }, 150);
+  const selectHospital = (code) => {
+    setSelectedHospitalCode(code);
+    setConfirmed(false);
   };
+
+  /* =======================================================
+     DESTINATION CONFIRMATION
+     ======================================================= */
 
   const confirmDestination = () => {
     setConfirmed(true);
-    setNotification(true);
+
+    setNotification(
+      `${selectedHospital.name} confirmed as receiving hospital.`
+    );
 
     setTimeout(() => {
       scrollToSection("preparation-panel");
     }, 300);
 
     setTimeout(() => {
-      setNotification(false);
-    }, 4500);
+      setNotification("");
+    }, 4000);
   };
+
+  /* =======================================================
+     SIMULATION
+     ======================================================= */
 
   const toggleSimulation = () => {
     setSimulation((current) => !current);
   };
 
-  const resetDemo = () => {
-    setConfirmed(false);
-    setRecording(false);
-    setNotification(false);
-    setSimulation(false);
-    setSelectedHospitalCode("HOSP-01");
-    setSearch("");
+  /* =======================================================
+     VOICE-TO-TEXT
+     ======================================================= */
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+  const stopVoiceRecognition = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (error) {
+        console.log("Recognition already stopped.");
+      }
+
+      recognitionRef.current = null;
+    }
+
+    setRecording(false);
   };
 
-  const currentEta = simulation ? 8 : 9;
-  const currentDistance = simulation ? "5.1 km" : "5.8 km";
+  const startVoiceRecognition = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setVoiceError(
+        "Voice-to-text is not supported in this browser. Please use Google Chrome or Microsoft Edge."
+      );
+
+      return;
+    }
+
+    if (recording) {
+      stopVoiceRecognition();
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+
+      recognition.lang = "en-IN";
+
+      /*
+       * One complete sentence at a time is more reliable
+       * for the hackathon demo than continuous recognition.
+       */
+      recognition.continuous = false;
+
+      recognition.interimResults = true;
+
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setRecording(true);
+
+        setVoiceError(
+          "🎙 Microphone active. Speak now..."
+        );
+      };
+
+      recognition.onaudiostart = () => {
+        setVoiceError(
+          "🎙 Microphone connected. Listening..."
+        );
+      };
+
+      recognition.onspeechstart = () => {
+        setVoiceError(
+          "Listening to your voice..."
+        );
+      };
+
+      recognition.onresult = (event) => {
+        let finalText = "";
+        let interimText = "";
+
+        for (
+          let i = event.resultIndex;
+          i < event.results.length;
+          i++
+        ) {
+          const result = event.results[i];
+
+          if (result.isFinal) {
+            finalText += result[0].transcript;
+          } else {
+            interimText += result[0].transcript;
+          }
+        }
+
+        /* Final converted speech */
+        if (finalText.trim()) {
+          setTranscript((previous) => {
+            const newText = finalText.trim();
+
+            if (!previous.trim()) {
+              return newText;
+            }
+
+            return `${previous.trim()} ${newText}`;
+          });
+
+          setVoiceError(
+            "✓ Voice converted to text successfully."
+          );
+        }
+
+        /* Live speech feedback */
+        if (interimText.trim()) {
+          setVoiceError(
+            `Listening: ${interimText.trim()}`
+          );
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error(
+          "Speech recognition error:",
+          event.error
+        );
+
+        if (event.error === "not-allowed") {
+          setVoiceError(
+            "Microphone permission denied. Please allow microphone access in Chrome."
+          );
+        } else if (event.error === "no-speech") {
+          setVoiceError(
+            "No speech detected. Please speak clearly and try again."
+          );
+        } else if (event.error === "audio-capture") {
+          setVoiceError(
+            "Microphone not detected. Please check your microphone."
+          );
+        } else if (event.error === "network") {
+          setVoiceError(
+            "Speech recognition network error. Check your internet connection."
+          );
+        } else {
+          setVoiceError(
+            `Voice recognition error: ${event.error}`
+          );
+        }
+
+        setRecording(false);
+      };
+
+      recognition.onspeechend = () => {
+        setVoiceError(
+          "Processing voice..."
+        );
+      };
+
+      recognition.onend = () => {
+        setRecording(false);
+        recognitionRef.current = null;
+      };
+
+      recognitionRef.current = recognition;
+
+      recognition.start();
+    } catch (error) {
+      console.error(
+        "Unable to start speech recognition:",
+        error
+      );
+
+      setRecording(false);
+
+      setVoiceError(
+        "Unable to start microphone. Please check browser permissions."
+      );
+    }
+  };
+
+  /* =======================================================
+     CLEANUP
+     ======================================================= */
+
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (error) {
+          console.log("Voice recognition cleanup.");
+        }
+      }
+    };
+  }, []);
+
+  /* =======================================================
+     LOGIN GATE
+     ======================================================= */
+
+  if (!loggedIn) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
+
+  /* =======================================================
+     MAIN DASHBOARD
+     ======================================================= */
 
   return (
     <div className="app">
 
-      {/* SUCCESS NOTIFICATION */}
-      {notification && (
-        <div className="success-toast" role="status">
-          <div className="toast-icon">✓</div>
+      {/* ===================================================
+          HEADER
+          =================================================== */}
 
-          <div>
-            <strong>Hospital Notified Successfully</strong>
-
-            <span>
-              {selectedHospital.name} received the emergency
-              profile and ambulance ETA.
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* HEADER */}
       <header className="header">
 
         <div className="brand">
 
           <div className="brand-logo">
-            +
+            <span>+</span>
           </div>
 
           <div>
@@ -180,25 +571,41 @@ function App() {
 
         <div className="header-actions">
 
+          <div className="workspace-badge">
+            {role === "ambulance"
+              ? "🚑"
+              : "🏥"}
+
+            <span>
+              {role === "ambulance"
+                ? "Ambulance Workspace"
+                : "Hospital Workspace"}
+            </span>
+
+            <small>{userId}</small>
+          </div>
+
           <div className="system-status">
             <span className="online-dot"></span>
             System Online
           </div>
 
           <button
-            className="reset-button"
-            onClick={resetDemo}
+            className="logout-button"
+            onClick={logout}
           >
-            Reset Demo
+            Logout
           </button>
 
         </div>
-
       </header>
 
       <main className="dashboard">
 
-        {/* HERO */}
+        {/* =================================================
+            HERO
+            ================================================= */}
+
         <section className="hero-section">
 
           <div className="hero-overlay"></div>
@@ -206,7 +613,9 @@ function App() {
           <div className="hero-content">
 
             <span className="hero-label">
-              EMERGENCY COMMAND CENTRE
+              {role === "ambulance"
+                ? "AMBULANCE EMERGENCY WORKSPACE"
+                : "HOSPITAL RECEIVING WORKSPACE"}
             </span>
 
             <h2>
@@ -218,9 +627,9 @@ function App() {
             </h2>
 
             <p>
-              Dual Link connects ambulance movement,
-              patient information and hospital readiness
-              into one emergency coordination workflow.
+              Dual Link connects ambulances, patients
+              and hospital readiness in real time to
+              coordinate emergency care.
             </p>
 
             <div className="hero-buttons">
@@ -243,23 +652,64 @@ function App() {
 
           <div className="hero-case">
 
-            <span>
-              ACTIVE EMERGENCY
-            </span>
+            <span>ACTIVE EMERGENCY</span>
 
             <strong>
               DL-2026-0842
             </strong>
 
             <small>
-              Trauma Response · Synthetic Demo
+              Trauma Response
             </small>
 
           </div>
 
         </section>
 
-        {/* KPI CARDS */}
+        {/* =================================================
+            ROLE INFORMATION
+            ================================================= */}
+
+        <section className="role-banner">
+
+          <div>
+
+            <span>
+              CURRENT WORKSPACE
+            </span>
+
+            <strong>
+              {role === "ambulance"
+                ? "🚑 Ambulance Medical Team"
+                : "🏥 Receiving Hospital Team"}
+            </strong>
+
+            <small>
+              {role === "ambulance"
+                ? "Collect patient information, communicate observations and track destination readiness."
+                : "Monitor incoming emergency cases, review patient information and prepare hospital resources."}
+            </small>
+
+          </div>
+
+          <div className="role-status">
+
+            <span>
+              SESSION ACTIVE
+            </span>
+
+            <strong>
+              {userId}
+            </strong>
+
+          </div>
+
+        </section>
+
+        {/* =================================================
+            KPI CARDS
+            ================================================= */}
+
         <section className="cards">
 
           <div className="card">
@@ -271,9 +721,7 @@ function App() {
             <div>
               <span>AMBULANCE</span>
               <strong>AMB-042</strong>
-              <small>
-                GPS tracking active
-              </small>
+              <small>GPS tracking active</small>
             </div>
 
           </div>
@@ -286,12 +734,8 @@ function App() {
 
             <div>
               <span>PATIENT</span>
-              <strong>
-                Trauma — Urgent
-              </strong>
-              <small>
-                Continuous monitoring
-              </small>
+              <strong>Trauma — Urgent</strong>
+              <small>Continuous monitoring</small>
             </div>
 
           </div>
@@ -306,13 +750,11 @@ function App() {
               <span>LIVE ETA</span>
 
               <strong>
-                {currentEta} minutes
+                {ambulanceEta} minutes
               </strong>
 
               <small>
-                {simulation
-                  ? "Traffic-adjusted demo"
-                  : "5.8 km remaining"}
+                {distance} remaining
               </small>
             </div>
 
@@ -326,19 +768,18 @@ function App() {
 
             <div>
               <span>HOSPITALS</span>
-              <strong>
-                3 Analysed
-              </strong>
-              <small>
-                Readiness comparison
-              </small>
+              <strong>3 Analysed</strong>
+              <small>Readiness comparison</small>
             </div>
 
           </div>
 
         </section>
 
-        {/* EMERGENCY ALERT */}
+        {/* =================================================
+            EMERGENCY ALERT
+            ================================================= */}
+
         <section className="emergency-alert">
 
           <div className="alert-icon">
@@ -352,14 +793,14 @@ function App() {
             </span>
 
             <h3>
-              Trauma patient requires an immediate
+              Trauma patient requires immediate
               receiving hospital
             </h3>
 
             <p>
-              Dual Link is analysing patient needs,
-              ambulance ETA and operational readiness
-              before presenting a destination option.
+              Dual Link is analysing patient condition,
+              ambulance ETA and hospital operational
+              readiness.
             </p>
 
           </div>
@@ -371,14 +812,17 @@ function App() {
             </span>
 
             <strong>
-              {simulation ? "08:00" : "09:00"}
+              0{ambulanceEta}:00
             </strong>
 
           </div>
 
         </section>
 
-        {/* AMBULANCE LINK */}
+        {/* =================================================
+            AMBULANCE
+            ================================================= */}
+
         <section className="panel ambulance-panel">
 
           <div className="panel-heading">
@@ -429,9 +873,7 @@ function App() {
 
             <div className="info-box">
 
-              <span>
-                LOCATION
-              </span>
+              <span>LOCATION</span>
 
               <strong>
                 Avinashi Road
@@ -445,12 +887,10 @@ function App() {
 
             <div className="info-box">
 
-              <span>
-                DISTANCE
-              </span>
+              <span>DISTANCE</span>
 
               <strong>
-                {currentDistance}
+                {distance}
               </strong>
 
               <small>
@@ -461,12 +901,10 @@ function App() {
 
             <div className="info-box">
 
-              <span>
-                ETA
-              </span>
+              <span>ETA</span>
 
               <strong>
-                {currentEta} min
+                {ambulanceEta} min
               </strong>
 
               <small className="green">
@@ -479,7 +917,10 @@ function App() {
 
         </section>
 
-        {/* PATIENT LINK */}
+        {/* =================================================
+            PATIENT
+            ================================================= */}
+
         <section className="panel patient-panel">
 
           <div className="panel-heading">
@@ -505,7 +946,6 @@ function App() {
           <div className="patient-summary">
 
             <div>
-
               <span className="muted">
                 CASE ID
               </span>
@@ -513,11 +953,9 @@ function App() {
               <strong>
                 DL-2026-0842
               </strong>
-
             </div>
 
             <div>
-
               <span className="muted">
                 BLOOD GROUP
               </span>
@@ -525,11 +963,9 @@ function App() {
               <strong>
                 O+
               </strong>
-
             </div>
 
             <div>
-
               <span className="muted">
                 CONDITION
               </span>
@@ -537,11 +973,9 @@ function App() {
               <strong className="urgent">
                 TRAUMA — URGENT
               </strong>
-
             </div>
 
             <div>
-
               <span className="muted">
                 CONSCIOUSNESS
               </span>
@@ -549,7 +983,6 @@ function App() {
               <strong>
                 Conscious & Responding
               </strong>
-
             </div>
 
           </div>
@@ -557,7 +990,6 @@ function App() {
           <div className="vitals-grid">
 
             <div className="vital-card">
-
               <span>
                 ♥ HEART RATE
               </span>
@@ -569,11 +1001,9 @@ function App() {
               <em>
                 Elevated
               </em>
-
             </div>
 
             <div className="vital-card">
-
               <span>
                 ◉ SpO₂
               </span>
@@ -585,11 +1015,9 @@ function App() {
               <em>
                 Stable
               </em>
-
             </div>
 
             <div className="vital-card">
-
               <span>
                 BP
               </span>
@@ -601,11 +1029,9 @@ function App() {
               <em>
                 Monitoring
               </em>
-
             </div>
 
             <div className="vital-card">
-
               <span>
                 🌡 TEMPERATURE
               </span>
@@ -617,10 +1043,11 @@ function App() {
               <em>
                 Normal
               </em>
-
             </div>
 
           </div>
+
+          {/* VOICE RESULT ALSO APPEARS HERE */}
 
           <div className="observation">
 
@@ -637,8 +1064,8 @@ function App() {
             </div>
 
             <p>
-              Deep wound on the left leg with visible
-              bleeding. Patient is conscious and responding.
+              {transcript ||
+                "Deep wound on the left leg with visible bleeding. Patient is conscious and responding."}
             </p>
 
             <div className="tags">
@@ -665,7 +1092,10 @@ function App() {
 
         </section>
 
-        {/* MEDICAL ASSISTANT */}
+        {/* =================================================
+            VOICE TO TEXT
+            ================================================= */}
+
         <section className="panel assistant-panel">
 
           <div className="panel-heading">
@@ -682,8 +1112,8 @@ function App() {
 
             </div>
 
-            <span className="secure-pill">
-              Structured input
+            <span className="voice-supported">
+              🎙 SPEECH RECOGNITION
             </span>
 
           </div>
@@ -703,25 +1133,32 @@ function App() {
               <div>
 
                 <span className="muted">
-                  VOICE INPUT
+                  LIVE VOICE INPUT
                 </span>
 
                 <p>
                   {recording
-                    ? "Listening to medical observation..."
-                    : "Describe visible injuries using voice."}
+                    ? "Listening... Speak the patient's visible injury."
+                    : "Describe visible injuries using your voice."}
                 </p>
 
                 <button
-                  className="voice-button"
-                  onClick={() =>
-                    setRecording((current) => !current)
-                  }
+                  className={`voice-button ${
+                    recording ? "recording" : ""
+                  }`}
+                  onClick={startVoiceRecognition}
+                  type="button"
                 >
                   {recording
-                    ? "Stop Recording"
-                    : "Start Voice Input"}
+                    ? "■ Stop Listening"
+                    : "🎙 Start Voice Input"}
                 </button>
+
+                {voiceError && (
+                  <small className="voice-message">
+                    {voiceError}
+                  </small>
+                )}
 
               </div>
 
@@ -730,35 +1167,43 @@ function App() {
             <div className="structured-card">
 
               <span className="muted">
-                STRUCTURED EMERGENCY INFORMATION
+                RECOGNISED EMERGENCY INFORMATION
               </span>
 
               <p>
-                “Patient has a deep wound on the left
-                leg with visible bleeding. Patient is
-                conscious and responding.”
+                {transcript
+                  ? transcript
+                  : "Your recognised speech will appear here."}
               </p>
+
+              {transcript && (
+                <button
+                  className="clear-voice"
+                  onClick={() => {
+                    setTranscript("");
+                    setVoiceError("");
+                  }}
+                  type="button"
+                >
+                  Clear Voice Text
+                </button>
+              )}
 
               <div className="tags">
 
                 <span>
-                  Body Part: Left Leg
+                  Speech-to-Text
                 </span>
 
                 <span>
-                  Bleeding: Visible
+                  Medical Observation
                 </span>
 
                 <span>
-                  Conscious: Yes
+                  Real-Time Input
                 </span>
 
               </div>
-
-              <small className="demo-note">
-                Prototype demonstration:
-                voice-to-structure is simulated.
-              </small>
 
             </div>
 
@@ -766,7 +1211,10 @@ function App() {
 
         </section>
 
-        {/* HOSPITAL READINESS */}
+        {/* =================================================
+            HOSPITAL READINESS
+            ================================================= */}
+
         <section className="panel hospital-panel">
 
           <div className="panel-heading">
@@ -782,8 +1230,8 @@ function App() {
               </h3>
 
               <p>
-                Operational readiness is evaluated
-                alongside travel time.
+                Operational readiness, specialties and
+                travel time are evaluated together.
               </p>
 
             </div>
@@ -802,38 +1250,6 @@ function App() {
 
           </div>
 
-          {/* SEARCH + SIMULATION */}
-          <div className="hospital-tools">
-
-            <div className="search-box">
-
-              <span>
-                ⌕
-              </span>
-
-              <input
-                type="text"
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="Search hospital or status..."
-                aria-label="Search hospitals"
-              />
-
-            </div>
-
-            <button
-              className="simulation-button"
-              onClick={toggleSimulation}
-            >
-              {simulation
-                ? "Stop Route Simulation"
-                : "▶ Simulate Live Movement"}
-            </button>
-
-          </div>
-
           <div className="hospital-list">
 
             <div className="hospital-header">
@@ -843,7 +1259,7 @@ function App() {
               </span>
 
               <span>
-                EMERGENCY BEDS
+                BEDS
               </span>
 
               <span>
@@ -868,28 +1284,29 @@ function App() {
 
             </div>
 
-            {filteredHospitals.map((hospital) => (
+            {hospitals.map((hospital) => (
 
               <button
                 key={hospital.code}
-                type="button"
                 className={`hospital-row ${
-                  selectedHospital.code === hospital.code
+                  selectedHospitalCode ===
+                  hospital.code
                     ? "recommended-row"
                     : ""
                 }`}
                 onClick={() =>
-                  selectHospital(hospital)
+                  selectHospital(hospital.code)
                 }
+                type="button"
               >
 
-                <span className="hospital-name">
+                <div className="hospital-name">
 
-                  <span className="hospital-logo">
+                  <div className="hospital-logo">
                     ✚
-                  </span>
+                  </div>
 
-                  <span>
+                  <div className="hospital-name-content">
 
                     <strong>
                       {hospital.name}
@@ -899,11 +1316,26 @@ function App() {
                       {hospital.code}
                     </small>
 
-                  </span>
+                    <div className="specialty-tags">
 
-                </span>
+                      {hospital.specialties
+                        .slice(0, 3)
+                        .map((specialty) => (
+                          <span
+                            className="specialty-tag"
+                            key={specialty}
+                          >
+                            {specialty}
+                          </span>
+                        ))}
 
-                <span className="hospital-metric">
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div className="hospital-metric">
 
                   <span>
                     EMERGENCY BEDS
@@ -913,9 +1345,9 @@ function App() {
                     {hospital.beds}
                   </strong>
 
-                </span>
+                </div>
 
-                <span className="hospital-metric">
+                <div className="hospital-metric">
 
                   <span>
                     ICU
@@ -925,9 +1357,9 @@ function App() {
                     {hospital.icu}
                   </strong>
 
-                </span>
+                </div>
 
-                <span className="hospital-metric">
+                <div className="hospital-metric">
 
                   <span>
                     DOCTOR
@@ -935,7 +1367,8 @@ function App() {
 
                   <strong
                     className={
-                      hospital.doctor === "Available"
+                      hospital.doctor ===
+                      "Available"
                         ? "available"
                         : "busy"
                     }
@@ -943,9 +1376,9 @@ function App() {
                     {hospital.doctor}
                   </strong>
 
-                </span>
+                </div>
 
-                <span className="hospital-metric">
+                <div className="hospital-metric">
 
                   <span>
                     BLOOD
@@ -955,27 +1388,22 @@ function App() {
                     {hospital.blood}
                   </strong>
 
-                </span>
+                </div>
 
-                <span className="hospital-metric">
+                <div className="hospital-metric">
 
                   <span>
                     ETA
                   </span>
 
                   <strong>
-                    {simulation
-                      ? Math.max(hospital.eta - 1, 1)
-                      : hospital.eta}{" "}
-                    min
+                    {hospital.eta} min
                   </strong>
 
-                </span>
+                </div>
 
                 <span
-                  className={`hospital-status ${
-                    hospital.status.toLowerCase()
-                  }`}
+                  className={`hospital-status ${hospital.status.toLowerCase()}`}
                 >
                   {hospital.status}
                 </span>
@@ -983,14 +1411,6 @@ function App() {
               </button>
 
             ))}
-
-            {filteredHospitals.length === 0 && (
-
-              <div className="empty-state">
-                No matching hospitals found.
-              </div>
-
-            )}
 
           </div>
 
@@ -1008,19 +1428,47 @@ function App() {
 
               <p>
                 The nearest hospital may not have the
-                resources required. Dual Link compares
-                emergency capacity, ICU, doctors, blood,
-                trauma support and ETA before presenting
-                a destination option.
+                resources or specialty required. Dual Link
+                compares emergency capacity, ICU, doctors,
+                blood availability, trauma support,
+                specialties and ETA before presenting
+                the destination option.
               </p>
 
             </div>
 
           </div>
 
+          <div className="simulation-control">
+
+            <button
+              className={
+                simulation
+                  ? "simulation-active"
+                  : ""
+              }
+              onClick={toggleSimulation}
+              type="button"
+            >
+              {simulation
+                ? "● Live Movement Active"
+                : "▶ Simulate Live Movement"}
+            </button>
+
+            <span>
+              {simulation
+                ? "Ambulance position and ETA are updating."
+                : "Use simulation for the hackathon demonstration."}
+            </span>
+
+          </div>
+
         </section>
 
-        {/* DECISION ENGINE */}
+        {/* =================================================
+            AI RECOMMENDATION
+            ================================================= */}
+
         <section className="recommendation-panel">
 
           <div className="recommendation-header">
@@ -1052,7 +1500,7 @@ function App() {
             <div className="recommendation-text">
 
               <span>
-                SELECTED RECEIVING HOSPITAL
+                RECOMMENDED RECEIVING HOSPITAL
               </span>
 
               <h2>
@@ -1060,22 +1508,40 @@ function App() {
               </h2>
 
               <p>
-                This prototype prioritises operational
-                readiness and practical travel time for
-                the current emergency profile.
+                Hospital readiness is compared using
+                available emergency resources,
+                specialty capability and practical
+                ambulance travel time.
               </p>
 
-              <div className="score-bar">
+              {/* HOSPITAL SPECIALTIES */}
 
-                <span
-                  style={{
-                    width: `${selectedHospital.score}%`,
-                  }}
-                ></span>
+              <div className="recommendation-specialties">
+
+                <span>
+                  Available Specialties
+                </span>
+
+                <div className="recommendation-factors">
+
+                  {selectedHospital.specialties.map(
+                    (specialty) => (
+                      <span key={specialty}>
+                        ✓ {specialty}
+                      </span>
+                    )
+                  )}
+
+                </div>
 
               </div>
 
-              <div className="recommendation-factors">
+              {/* READINESS FACTORS */}
+
+              <div
+                className="recommendation-factors"
+                style={{ marginTop: "10px" }}
+              >
 
                 <span>
                   ✓ Emergency Bed
@@ -1116,9 +1582,7 @@ function App() {
               </strong>
 
               <small>
-                {selectedHospital.status === "READY"
-                  ? "High readiness"
-                  : "Review required"}
+                Operational readiness
               </small>
 
             </div>
@@ -1133,8 +1597,9 @@ function App() {
 
             <span>
               Destination selection considers patient
-              needs, hospital readiness and ambulance
-              ETA instead of distance alone.
+              needs, hospital readiness, specialty
+              capability and ambulance ETA instead
+              of distance alone.
             </span>
 
           </div>
@@ -1144,6 +1609,7 @@ function App() {
             <button
               className="secondary-button"
               onClick={reviewHospitals}
+              type="button"
             >
               Review Hospital Details
             </button>
@@ -1152,6 +1618,7 @@ function App() {
               className="primary-button"
               onClick={confirmDestination}
               disabled={confirmed}
+              type="button"
             >
               {confirmed
                 ? "✓ Destination Confirmed"
@@ -1162,7 +1629,10 @@ function App() {
 
         </section>
 
-        {/* PRE-ARRIVAL PREPARATION */}
+        {/* =================================================
+            PREPARATION
+            ================================================= */}
+
         <section className="panel preparation-panel">
 
           <div className="panel-heading">
@@ -1210,7 +1680,8 @@ function App() {
                 </strong>
 
                 <small>
-                  Ambulance AMB-042 · ETA {currentEta} minutes
+                  {selectedHospital.code} · Ambulance
+                  AMB-042 · ETA {ambulanceEta} minutes
                 </small>
 
               </div>
@@ -1224,7 +1695,7 @@ function App() {
               </span>
 
               <strong>
-                {String(currentEta).padStart(2, "0")} MIN
+                {String(ambulanceEta).padStart(2, "0")} MIN
               </strong>
 
             </div>
@@ -1233,7 +1704,14 @@ function App() {
 
           <div className="preparation-grid">
 
-            {preparationItems.map((item) => (
+            {[
+              "Emergency Bed",
+              "ICU",
+              "Emergency Doctor",
+              "O+ Blood",
+              "Trauma Team",
+              "Emergency OT",
+            ].map((item) => (
 
               <div
                 key={item}
@@ -1277,7 +1755,10 @@ function App() {
 
         </section>
 
-        {/* LIVE ROUTE */}
+        {/* =================================================
+            ROUTE
+            ================================================= */}
+
         <section className="panel route-panel">
 
           <div className="panel-heading">
@@ -1315,33 +1796,27 @@ function App() {
             ></div>
 
             <div className="map-marker ambulance-marker">
-
               🚑
-
               <span>
                 AMB-042
               </span>
-
             </div>
 
             <div className="map-marker hospital-marker">
-
               ✚
-
               <span>
-                HOSPITAL
+                {selectedHospital.code}
               </span>
-
             </div>
 
             <div className="map-info">
 
               <strong>
-                {currentDistance}
+                {distance}
               </strong>
 
               <span>
-                Estimated travel · {currentEta} min
+                Estimated travel · {ambulanceEta} min
               </span>
 
             </div>
@@ -1350,7 +1825,10 @@ function App() {
 
         </section>
 
-        {/* WORKFLOW */}
+        {/* =================================================
+            WORKFLOW
+            ================================================= */}
+
         <section className="workflow-section">
 
           <div>
@@ -1376,25 +1854,33 @@ function App() {
               🚑 Ambulance
             </span>
 
-            <b>→</b>
+            <b>
+              →
+            </b>
 
             <span>
               ♥ Patient
             </span>
 
-            <b>→</b>
+            <b>
+              →
+            </b>
 
             <span>
               ✦ Dual Link
             </span>
 
-            <b>→</b>
+            <b>
+              →
+            </b>
 
             <span>
               🏥 Hospital
             </span>
 
-            <b>→</b>
+            <b>
+              →
+            </b>
 
             <span>
               ✓ Prepared
@@ -1406,7 +1892,10 @@ function App() {
 
       </main>
 
-      {/* FOOTER */}
+      {/* ===================================================
+          FOOTER
+          =================================================== */}
+
       <footer>
 
         <span>
@@ -1414,10 +1903,21 @@ function App() {
         </span>
 
         <span>
-          Prototype · Synthetic demonstration data · Not for clinical use
+          Prototype · Synthetic demonstration data ·
+          Not for clinical use
         </span>
 
       </footer>
+
+      {/* ===================================================
+          NOTIFICATION
+          =================================================== */}
+
+      {notification && (
+        <div className="notification-toast">
+          ✓ {notification}
+        </div>
+      )}
 
     </div>
   );
